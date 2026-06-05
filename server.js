@@ -1,14 +1,15 @@
 const express = require('express');
 const axios = require('axios');
 const crypto = require('crypto');
+const path = require('path'); // 1. 引入 path 模块，用于拼接文件路径
+const fs = require('fs');     // 2. 引入 fs 模块，用于读取文件
 
-// 初始化 Express 应用
 const app = express();
 
 // 解析 JSON 请求体
 app.use(express.json());
 
-// ✅ 添加 CORS 跨域支持（非常重要，否则前端可能无法请求）
+// ✅ 添加 CORS 跨域支持
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Headers', 'Content-Type');
@@ -19,61 +20,52 @@ app.use((req, res, next) => {
   next();
 });
 
-// 百度翻译 API 配置
-// ⚠️ 注意：这些变量必须在 Vercel 后台的 Settings -> Environment Variables 中配置
-const APP_ID = process.env.BAIDU_APP_ID;
-const APP_KEY = process.env.BAIDU_KEY;
+// 3. 修改根路由：直接读取并发送 index.html
+app.get('/', (req, res) => {
+  // __dirname 代表当前 server.js 所在的目录
+  // 我们直接去根目录找 index.html
+  const filePath = path.join(__dirname, 'index.html');
 
-// 翻译接口路由
+  // 检查文件是否存在，防止报错
+  if (fs.existsSync(filePath)) {
+    res.sendFile(filePath);
+  } else {
+    res.status(404).send('找不到 index.html 文件，请确保它和 server.js 在同一级目录。');
+  }
+});
+
+// 百度翻译 API 接口 (保持原样)
 app.post('/translate', async (req, res) => {
-  const { q, from = 'auto', to = 'zh' } = req.body;
-
-  // 基础校验
-  if (!q) {
-    return res.status(400).json({ error: '缺少翻译文本参数 q' });
-  }
-
-  if (!APP_ID || !APP_KEY) {
-    console.error('❌ 错误：未检测到环境变量 BAIDU_APP_ID 或 BAIDU_KEY');
-    return res.status(500).json({ error: '服务器配置错误，请联系管理员' });
-  }
-
   try {
-    // 生成签名 (MD5加密)
-    // 格式：appid + q + salt + key
+    const { q, from, to } = req.body;
+    const appid = process.env.BAIDU_APP_ID;
+    const key = process.env.BAIDU_KEY;
+
+    if (!appid || !key) {
+      return res.status(500).json({ error: '服务器未配置百度翻译密钥' });
+    }
+
     const salt = new Date().getTime();
-    const str1 = APP_ID + q + salt + APP_KEY;
+    const str1 = appid + q + salt + key;
     const sign = crypto.createHash('md5').update(str1).digest('hex');
 
-    // 调用百度翻译 API
     const response = await axios.get('https://fanyi-api.baidu.com/api/trans/vip/translate', {
       params: {
         q: q,
-        from: from,
-        to: to,
-        appid: APP_ID,
+        from: from || 'auto',
+        to: to || 'auto',
+        appid: appid,
         salt: salt,
-        sign: sign,
-      },
+        sign: sign
+      }
     });
 
-    // 返回翻译结果
-    const result = response.data.trans_result
-      ? response.data.trans_result.map((item) => item.dst).join('\n')
-      : '翻译失败';
-
-    res.json({ result });
+    res.json(response.data);
   } catch (error) {
-    console.error('翻译出错:', error.message);
-    res.status(500).json({ error: '翻译服务异常，请稍后重试' });
+    console.error(error);
+    res.status(500).json({ error: '翻译请求失败' });
   }
 });
 
-// 测试根路由
-app.get('/', (req, res) => {
-  res.send('🚀 翻译服务后端已成功运行！请访问 /translate 接口。');
-});
-
-// ✅ 关键修改：导出 app 供 Vercel Serverless 函数调用
-// Vercel 不会执行 app.listen，而是直接导入这个 app
+// 导出 app 供 Vercel 使用
 module.exports = app;
