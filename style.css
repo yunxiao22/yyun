@@ -1,0 +1,420 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, "Microsoft YaHei", sans-serif;
+    background: linear-gradient(135deg, #edf3ff, #f9fbff);
+    color: #1f2937;
+    min-height: 100vh;
+}
+
+.app {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 22px;
+}
+
+.container {
+    width: 100%;
+    max-width: 620px;
+    background: #ffffff;
+    border-radius: 22px;
+    padding: 28px;
+    box-shadow: 0 14px 38px rgba(0, 0, 0, 0.12);
+}
+
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+h1 {
+    margin: 0;
+    font-size: 28px;
+    color: #111827;
+}
+
+.subtitle {
+    margin: 8px 0 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.icon-btn {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: none;
+    background: #f3f4f6;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+.control-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    align-items: end;
+}
+
+.select-box {
+    flex: 1;
+}
+
+label {
+    display: block;
+    font-size: 14px;
+    color: #374151;
+    margin-bottom: 8px;
+}
+
+select,
+textarea,
+button {
+    font-size: 16px;
+    border-radius: 14px;
+}
+
+select {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    outline: none;
+}
+
+.swap-btn {
+    width: 56px;
+    height: 50px;
+    border: none;
+    background: #e0edff;
+    color: #2563eb;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.tip {
+    margin: 10px 0 0;
+    color: #2563eb;
+    font-size: 14px;
+}
+
+textarea {
+    width: 100%;
+    min-height: 130px;
+    padding: 15px;
+    margin-top: 14px;
+    border: 1px solid #d1d5db;
+    resize: none;
+    outline: none;
+    line-height: 1.65;
+    background: #fff;
+    color: #111827;
+}
+
+textarea:focus,
+select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+}
+
+.stats {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    color: #6b7280;
+    font-size: 13px;
+    margin-top: 8px;
+}
+
+.button-group {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+button {
+    border: none;
+    padding: 13px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: 0.2s;
+}
+
+.primary-btn {
+    flex: 1;
+    background: #2563eb;
+    color: #fff;
+}
+
+.primary-btn:hover {
+    background: #1d4ed8;
+}
+
+.primary-btn:disabled {
+    background: #93c5fd;
+    cursor: not-allowed;
+}
+
+.secondary-btn {
+    flex: 1;
+    background: #e5e7eb;
+    color: #111827;
+}
+
+.secondary-btn:hover {
+    background: #d1d5db;
+}
+
+.loading {
+    text-align: center;
+    color: #2563eb;
+    font-size: 14px;
+    margin-top: 14px;
+}
+
+.hidden {
+    display: none;
+}
+
+.result-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 14px;
+}
+
+.result-actions button {
+    background: #10b981;
+    color: #fff;
+}
+
+.result-actions button:hover {
+    background: #059669;
+}
+
+.panel {
+    margin-top: 22px;
+    padding: 16px;
+    border-radius: 16px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+}
+
+.panel h2 {
+    margin: 0;
+    font-size: 18px;
+    color: #111827;
+}
+
+.panel-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.panel-title button {
+    padding: 8px 12px;
+    font-size: 13px;
+    background: #e5e7eb;
+    color: #111827;
+}
+
+.word-info {
+    margin-top: 12px;
+    white-space: pre-line;
+    line-height: 1.7;
+    color: #374151;
+    font-size: 14px;
+}
+
+.record-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.record {
+    background: #fff;
+    border-radius: 14px;
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+}
+
+.record-source {
+    margin: 0 0 6px;
+    color: #111827;
+    font-weight: 700;
+}
+
+.record-result {
+    margin: 0 0 6px;
+    color: #2563eb;
+}
+
+.record-meta {
+    margin: 0;
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.record-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.record-actions button {
+    padding: 8px 12px;
+    font-size: 13px;
+    background: #eef2ff;
+    color: #2563eb;
+}
+
+.empty {
+    color: #9ca3af;
+    text-align: center;
+    margin: 8px 0;
+}
+
+.message {
+    min-height: 24px;
+    text-align: center;
+    color: #2563eb;
+    font-size: 14px;
+    margin: 16px 0 0;
+}
+
+/* 深色模式 */
+body.dark {
+    background: linear-gradient(135deg, #111827, #1f2937);
+    color: #f9fafb;
+}
+
+body.dark .container {
+    background: #111827;
+    box-shadow: 0 14px 38px rgba(0, 0, 0, 0.35);
+}
+
+body.dark h1,
+body.dark .panel h2,
+body.dark .record-source {
+    color: #f9fafb;
+}
+
+body.dark .subtitle,
+body.dark label,
+body.dark .stats,
+body.dark .record-meta {
+    color: #9ca3af;
+}
+
+body.dark select,
+body.dark textarea {
+    background: #1f2937;
+    color: #f9fafb;
+    border-color: #374151;
+}
+
+body.dark .icon-btn,
+body.dark .secondary-btn,
+body.dark .panel-title button {
+    background: #374151;
+    color: #f9fafb;
+}
+
+body.dark .panel {
+    background: #1f2937;
+    border-color: #374151;
+}
+
+body.dark .record {
+    background: #111827;
+    border-color: #374151;
+}
+
+body.dark .word-info {
+    color: #d1d5db;
+}
+
+body.dark .swap-btn {
+    background: #1e3a8a;
+    color: #bfdbfe;
+}
+
+/* 手机端优化 */
+@media (max-width: 600px) {
+    .app {
+        padding: 12px;
+    }
+
+    .container {
+        padding: 20px 16px 28px;
+        border-radius: 18px;
+    }
+
+    h1 {
+        font-size: 23px;
+    }
+
+    .subtitle {
+        font-size: 13px;
+    }
+
+    .control-row {
+        gap: 8px;
+    }
+
+    .swap-btn {
+        width: 52px;
+        height: 50px;
+    }
+
+    textarea {
+        min-height: 118px;
+        font-size: 15px;
+    }
+
+    .button-group {
+        position: sticky;
+        bottom: 10px;
+        z-index: 10;
+        background: rgba(255, 255, 255, 0.92);
+        padding: 8px 0;
+        backdrop-filter: blur(10px);
+    }
+
+    body.dark .button-group {
+        background: rgba(17, 24, 39, 0.92);
+    }
+
+    .result-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .stats {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .panel-title {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .panel-title button {
+        width: 100%;
+    }
+
+    .record-actions {
+        flex-direction: column;
+    }
+}
