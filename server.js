@@ -2,78 +2,56 @@ const express = require('express');
 const axios = require('axios');
 const crypto = require('crypto');
 const path = require('path');
-const fs = require('fs');
 
 const app = express();
 
-// 1. 解析 JSON 请求体
+// 1. 托管静态文件 (index.html, script.js, style.css)
+app.use(express.static(path.join(__dirname, 'public')));
+
+// 2. 解析 JSON 请求体
 app.use(express.json());
 
-// 2. 添加 CORS 跨域支持 (防止浏览器拦截)
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  next();
-});
-
-// 3. 【关键】托管静态文件 (解决 index.html, style.css 等文件的加载)
-// 这样你就不需要 public 文件夹了，所有文件都在根目录即可
-app.use(express.static(path.join(__dirname)));
-
-// 4. 【关键】定义翻译接口 (解决 404 问题)
-// 假设你的前端请求的是 /translate
+// 3. 定义翻译接口路由
 app.post('/translate', async (req, res) => {
-  try {
-    const { q, from, to } = req.body; // 接收前端发来的文字
+    try {
+        const { text } = req.body;
+        
+        if (!text) {
+            return res.status(400).json({ error: '请输入要翻译的内容' });
+        }
 
-    // 检查环境变量是否存在
-    const appId = process.env.BAIDU_APP_ID;
-    const key = process.env.BAIDU_KEY;
+        // 这里假设你使用百度翻译API，你需要替换成你自己的APP_ID和SECRET_KEY
+        const APP_ID = 'YOUR_BAIDU_APP_ID';
+        const SECRET_KEY = 'YOUR_BAIDU_SECRET_KEY';
+        
+        // 生成签名
+        const salt = new Date().getTime();
+        const str1 = APP_ID + text + salt + SECRET_KEY;
+        const sign = crypto.createHash('md5').update(str1).digest('hex');
 
-    if (!appId || !key) {
-      console.error("环境变量未找到！");
-      return res.status(500).json({ error: "服务器配置错误：缺少密钥" });
+        // 调用百度翻译API
+        const response = await axios.get('https://fanyi-api.baidu.com/api/trans/vip/translate', {
+            params: {
+                q: text,
+                from: 'auto',
+                to: 'en',
+                appid: APP_ID,
+                salt: salt,
+                sign: sign
+            }
+        });
+
+        // 返回翻译结果
+        res.json({ result: response.data.trans_result[0].dst });
+
+    } catch (error) {
+        console.error('翻译失败:', error);
+        res.status(500).json({ error: '翻译服务暂时不可用' });
     }
-
-    // 百度翻译 API 逻辑
-    const salt = Date.now();
-    const sign = crypto.createHash('md5').update(appId + q + salt + key).digest('hex');
-
-    const response = await axios.get('https://fanyi-api.baidu.com/api/trans/vip/translate', {
-      params: {
-        q: q,
-        from: from || 'auto',
-        to: to || 'zh',
-        appid: appId,
-        salt: salt,
-        sign: sign
-      }
-    });
-
-    // 返回翻译结果给前端
-    res.json(response.data);
-
-  } catch (error) {
-    console.error("翻译出错:", error.message);
-    res.status(500).json({ error: "翻译服务繁忙，请稍后再试" });
-  }
 });
 
-// 5. 兜底路由：确保访问根目录时返回 index.html
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-// 启动服务器 (Vercel 会接管端口，这里只是本地测试用)
+// 4. 启动服务器
 const PORT = process.env.PORT || 3000;
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
-}
-
-module.exports = app;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
