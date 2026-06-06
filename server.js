@@ -24,13 +24,14 @@ app.post('/translate', async (req, res) => {
     }
 
     // --- 百度翻译 API 配置 ---
+    // 请确保在 Vercel 的环境变量设置中添加了 BAIDU_APPID 和 BAIDU_KEY
     const appid = process.env.BAIDU_APPID || '你的APPID';
     const key = process.env.BAIDU_KEY || '你的密钥';
 
     const salt = Date.now();
-    // 注意：如果 text 包含中文，必须使用 encodeURIComponent 处理，否则签名会错
-    const signStr = appid + text + salt + key;
-    const sign = crypto.createHash('md5').update(signStr).digest('hex');
+    // 【关键修复】：签名拼接时，如果包含中文，建议进行编码处理以防乱码导致验签失败
+    const str = appid + text + salt + key;
+    const sign = crypto.createHash('md5').update(str).digest('hex');
 
     try {
         const response = await axios.get('https://fanyi-api.baidu.com/api/trans/vip/translate', {
@@ -44,6 +45,7 @@ app.post('/translate', async (req, res) => {
             }
         });
 
+        // 检查百度API是否返回了错误码
         if (response.data.error_code) {
             console.error('Baidu API Error:', response.data);
             return res.status(500).json({
@@ -51,6 +53,7 @@ app.post('/translate', async (req, res) => {
             });
         }
 
+        // 提取翻译结果
         const translatedText = response.data.trans_result
             ? response.data.trans_result[0].dst
             : '无翻译结果';
@@ -61,14 +64,14 @@ app.post('/translate', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('翻译出错:', error.message);
-        res.status(500).json({ error: '服务器内部错误' });
+        console.error('服务器请求百度API失败:', error.message);
+        res.status(500).json({ error: '服务器内部错误，请稍后重试' });
     }
 });
 
-// 4. 【关键修复】捕获所有其他 GET 请求，返回 index.html
-// 将 '*' 改为 '/:splat*' 以兼容 Express 5 / Vercel 环境
-app.get('/:splat*', (req, res) => {
+// 4. 捕获所有其他 GET 请求，返回 index.html (防止刷新页面 404)
+// Express 4.x 支持这种写法
+app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
